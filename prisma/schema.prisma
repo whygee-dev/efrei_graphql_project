@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model GenericCourse {
+  id              String        @id @default(cuid())
+  name            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deleted         Boolean       @default(false)
+  courses         Course[]
+}
+
+model Curriculum {
+  id              String        @id @default(cuid())
+  name            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deleted         Boolean       @default(false)
+  students        Student[]
+}
+
+model Course {
+  id              String        @id @default(cuid())
+  name            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  genericCourseId String
+  genericCourse   GenericCourse @relation(fields: [genericCourseId], references: [id])
+  startDate       DateTime
+  endDate         DateTime
+  deleted         Boolean       @default(false)
+  professorId     String
+  professor       Professor     @relation(fields: [professorId], references: [id])
+  exams           Exam[]
+  classes         Class[]
+}
+
+model Exam {
+  id          String              @id @default(cuid())
+  name        String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deleted     Boolean             @default(false)
+  courseId    String
+  course      Course              @relation(fields: [courseId], references: [id])
+  grades      Grade[]
+}
+
+model Student {
+  id            String              @id @default(cuid())
+  firstName     String
+  lastName      String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  deleted       Boolean             @default(false)
+  birthDate     DateTime
+  email         String              @unique
+  addressId     String
+  address       Address             @relation(fields: [addressId], references: [id])
+  curriculumId  String
+  curriculum    Curriculum          @relation(fields: [curriculumId], references: [id])
+  classes       Class[] 
+}
+
+model Professor {
+  id          String              @id @default(cuid())
+  name        String
+  addressId   String
+  address     Address             @relation(fields: [addressId], references: [id])
+  hourlyWage  Float
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deleted     Boolean             @default(false)
+  courses     Course[]
+  classes     Class[]
+}
+
+model Grade {
+  id          String              @id @default(cuid())
+  grade       Int
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  studentId   String
+  examId      String
+  deleted     Boolean             @default(false)
+  exam        Exam                @relation(fields: [examId], references: [id])
+}   
+
+model Class {
+  id          String            @id @default(cuid())
+  name        String  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  professorId String
+  courseId    String
+  classroomId String
+  deleted     Boolean           @default(false)
+  course      Course            @relation(fields: [courseId], references: [id])
+  professor   Professor         @relation(fields: [professorId], references: [id])
+  students    Student[]
+  classroom   Classroom         @relation(fields: [classroomId], references: [id])
+}
+
+model Classroom {
+  id          String              @id @default(cuid())
+  name        String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deleted     Boolean             @default(false)
+  classes     Class[]
+  addressId   String
+  address     Address             @relation(fields: [addressId], references: [id])
+}
+
+model Address {
+  id          String              @id @default(cuid())
+  street      String
+  city        String
+  zipCode     String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deleted     Boolean             @default(false)
+  students    Student[]
+  classrooms  Classroom[]
+  professors  Professor[]
+}
