@@ -64,12 +64,19 @@ type Course {
   genericCourse: GenericCourse!
 }
 
+type Grade {
+  id: String!
+  grade: Float!
+  student: Student!
+}
+
 type Exam {
   id: String!
   name: String!
   startDate: DateTime!
   endDate: DateTime!
   course: Course!
+  grades: [Grade!]!
 }
 
 type Campus {
@@ -158,6 +165,7 @@ type Mutation {
   createExam(data: CreateExamInput!): Exam!
   updateExam(data: UpdateExamInput!): Exam!
   deleteExam(id: String!): Exam!
+  gradeExam(data: GradeExamInput!): Exam!
   createProfessor(data: CreateProfessorInput!): Professor!
   updateProfessor(data: UpdateProfessorInput!): Professor!
   deleteProfessor(id: String!): Professor!
@@ -252,6 +260,12 @@ input UpdateExamInput {
   endDate: DateTime
   courseId: String
   id: String!
+}
+
+input GradeExamInput {
+  id: String!
+  grade: Float!
+  studentId: String!
 }
 
 input CreateProfessorInput {

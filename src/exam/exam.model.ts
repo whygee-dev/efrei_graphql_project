@@ -1,5 +1,6 @@
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
 import { Course } from 'src/course/course.model';
+import { Grade } from 'src/grade/grade.model';
 
 @ObjectType()
 export class Exam {
@@ -17,4 +18,7 @@ export class Exam {
 
   @Field(() => Course)
   course: Course;
+
+  @Field(() => [Grade])
+  grades: Grade[];
 }

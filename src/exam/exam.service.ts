@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateExamInput, UpdateExamInput } from './exam.input';
+import { CreateExamInput, GradeExamInput, UpdateExamInput } from './exam.input';
 import { partialize } from 'src/common/utils';
 
 const EXAM_INCLUDES = {
   course: {
     include: {
       genericCourse: true,
+    },
+  },
+  grades: {
+    include: {
+      student: true,
     },
   },
 };
@@ -58,6 +63,21 @@ export class ExamService {
     return this.prisma.exam.update({
       where: { id },
       data: { deleted: true },
+      include: EXAM_INCLUDES,
+    });
+  }
+
+  async gradeExam(data: GradeExamInput) {
+    return this.prisma.exam.update({
+      where: { id: data.id },
+      data: {
+        grades: {
+          create: {
+            grade: data.grade,
+            student: { connect: { id: data.studentId } },
+          },
+        },
+      },
       include: EXAM_INCLUDES,
     });
   }

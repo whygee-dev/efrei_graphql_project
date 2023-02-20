@@ -6,6 +6,9 @@ import { Course, Exam, GenericCourse, Professor } from '@prisma/client';
 import { createCourse } from 'src/prisma/seed/course';
 import { createProfessor } from 'src/prisma/seed/professor';
 import { createGenericCourse } from 'src/prisma/seed/genericCourse';
+import { createStudent } from 'src/prisma/seed/student';
+import { createGroup } from 'src/prisma/seed/group';
+import { createCurriculum } from 'src/prisma/seed/curriculum';
 
 describe('ExamResolver', () => {
   const manager = new IntegrationTestManager();
@@ -216,6 +219,85 @@ describe('ExamResolver', () => {
 
       expect(deletedExam).not.toBeNull();
       expect(deletedExam?.deleted).toBeTrue();
+    });
+  });
+
+  describe('gradeExam', () => {
+    const mutation = gql`
+      mutation GradeExam($data: GradeExamInput!) {
+        gradeExam(data: $data) {
+          id
+          name
+          startDate
+          endDate
+          course {
+            id
+            genericCourse {
+              id
+              name
+            }
+          }
+          grades {
+            id
+            grade
+            student {
+              id
+            }
+          }
+        }
+      }
+    `;
+
+    it('should grade an exam', async () => {
+      // Arrange
+      await populate();
+
+      const exam = await createExam(manager.prisma, course.id);
+      const curriculum = await createCurriculum(manager.prisma);
+      const group = await createGroup(manager.prisma, curriculum.id);
+      const student = await createStudent(
+        manager.prisma,
+        group.id,
+        curriculum.id,
+      );
+
+      const variables = {
+        data: {
+          id: exam.id,
+          grade: 20,
+          studentId: student.id,
+        },
+      };
+
+      // Act
+      const result = await manager.sendQuery<{ gradeExam: unknown }>(
+        mutation,
+        variables,
+      );
+
+      // Assert
+      expect(result.data.gradeExam).toMatchObject({
+        id: exam.id,
+        name: exam.name,
+        startDate: exam.startDate.toISOString(),
+        endDate: exam.endDate.toISOString(),
+        course: {
+          id: course.id,
+          genericCourse: {
+            id: course.genericCourse.id,
+            name: course.genericCourse.name,
+          },
+        },
+        grades: [
+          {
+            id: expect.any(String),
+            grade: variables.data.grade,
+            student: {
+              id: student.id,
+            },
+          },
+        ],
+      });
     });
   });
 

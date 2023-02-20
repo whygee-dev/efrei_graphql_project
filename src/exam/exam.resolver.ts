@@ -1,7 +1,7 @@
 import { Args, Resolver, Query, Mutation } from '@nestjs/graphql';
 import { Exam } from './exam.model';
 import { ExamService } from './exam.service';
-import { CreateExamInput, UpdateExamInput } from './exam.input';
+import { CreateExamInput, GradeExamInput, UpdateExamInput } from './exam.input';
 
 @Resolver()
 export class ExamResolver {
@@ -30,5 +30,10 @@ export class ExamResolver {
   @Query(() => [Exam])
   getExamsByCourse(@Args('courseId') courseId: string) {
     return this.examService.getExamsByCourse(courseId);
+  }
+
+  @Mutation(() => Exam)
+  gradeExam(@Args('data') data: GradeExamInput) {
+    return this.examService.gradeExam(data);
   }
 }

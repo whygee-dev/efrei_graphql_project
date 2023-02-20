@@ -20,3 +20,15 @@ export class UpdateExamInput extends PartialType(CreateExamInput) {
   @Field()
   id: string;
 }
+
+@InputType()
+export class GradeExamInput {
+  @Field()
+  id: string;
+
+  @Field()
+  grade: number;
+
+  @Field()
+  studentId: string;
+}
