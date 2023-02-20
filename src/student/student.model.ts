@@ -1,27 +1,25 @@
 import { Field, GraphQLISODateTime, ObjectType } from '@nestjs/graphql';
-import { Address } from 'src/common/graphql/Address.model';
-import { Curriculum } from 'src/curriculum/curriculum.model';
+import { Curriculum } from '../curriculum/curriculum.model';
+import { Group } from 'src/group/group.model';
+import { PersonalInfo } from 'src/common/graphql/PersonalInfo';
 
 @ObjectType()
 export class Student {
   @Field()
   id: string;
 
-  @Field()
-  name: string;
-
-  @Field()
-  email: string;
-
-  @Field(() => Address)
-  address: Address;
+  @Field(() => PersonalInfo)
+  personalInfo: PersonalInfo;
 
   @Field(() => Curriculum)
   curriculum: Curriculum;
 
+  @Field(() => Group)
+  group: Group;
+
   @Field(() => GraphQLISODateTime)
   createdAt: Date;
 
-  @Field()
+  @Field(() => GraphQLISODateTime)
   updatedAt: Date;
 }

@@ -19,6 +19,19 @@ model GenericCourse {
   courses         Course[]
 }
 
+model Group {
+  id              String        @id @default(cuid())
+  name            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deleted         Boolean       @default(false)
+  curriculumId    String
+  curriculum      Curriculum    @relation(fields: [curriculumId], references: [id])
+  students        Student[]
+
+  @@unique([name, curriculumId])
+}
+
 model Curriculum {
   id              String        @id @default(cuid())
   name            String
@@ -26,11 +39,11 @@ model Curriculum {
   updatedAt       DateTime      @updatedAt
   deleted         Boolean       @default(false)
   students        Student[]
+  groups          Group[]
 }
 
 model Course {
   id              String        @id @default(cuid())
-  name            String
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   genericCourseId String
@@ -47,6 +60,8 @@ model Course {
 model Exam {
   id          String              @id @default(cuid())
   name        String
+  startDate   DateTime
+  endDate     DateTime
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   deleted     Boolean             @default(false)
@@ -55,33 +70,46 @@ model Exam {
   grades      Grade[]
 }
 
-model Student {
-  id            String              @id @default(cuid())
-  firstName     String
-  lastName      String
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  deleted       Boolean             @default(false)
-  birthDate     DateTime
-  email         String              @unique
-  addressId     String
-  address       Address             @relation(fields: [addressId], references: [id])
-  curriculumId  String
-  curriculum    Curriculum          @relation(fields: [curriculumId], references: [id])
-  classes       Class[] 
-}
-
-model Professor {
+model PersonalInfo {
   id          String              @id @default(cuid())
-  name        String
-  addressId   String
-  address     Address             @relation(fields: [addressId], references: [id])
-  hourlyWage  Float
+  firstName   String
+  lastName    String
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   deleted     Boolean             @default(false)
-  courses     Course[]
-  classes     Class[]
+  email       String              @unique
+  birthDate   DateTime 
+  addressId   String
+  address     Address             @relation(fields: [addressId], references: [id])
+  studentId   String?
+  student     Student?            
+  professorId String?
+  professor   Professor?          
+}
+
+model Student {
+  id             String              @id @default(cuid())
+  personalInfoId String              @unique
+  personalInfo   PersonalInfo        @relation(fields: [personalInfoId], references: [id])
+  curriculumId   String
+  curriculum     Curriculum          @relation(fields: [curriculumId], references: [id])
+  classes        Class[] 
+  groupId        String
+  group          Group               @relation(fields: [groupId], references: [id])
+  grades         Grade[]
+  deleted       Boolean             @default(false)
+}
+
+model Professor {
+  id            String              @id @default(cuid())
+  personalInfoId String             @unique
+  personalInfo  PersonalInfo        @relation(fields: [personalInfoId], references: [id])
+  hourlyWage    Float
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  deleted       Boolean             @default(false)
+  courses       Course[]
+  classes       Class[]
 }
 
 model Grade {
@@ -90,6 +118,7 @@ model Grade {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   studentId   String
+  student     Student             @relation(fields: [studentId], references: [id])
   examId      String
   deleted     Boolean             @default(false)
   exam        Exam                @relation(fields: [examId], references: [id])
@@ -97,7 +126,8 @@ model Grade {
 
 model Class {
   id          String            @id @default(cuid())
-  name        String  
+  startDate   DateTime
+  endDate     DateTime
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   professorId String
@@ -110,26 +140,52 @@ model Class {
   classroom   Classroom         @relation(fields: [classroomId], references: [id])
 }
 
-model Classroom {
+model Campus {
   id          String              @id @default(cuid())
   name        String
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   deleted     Boolean             @default(false)
-  classes     Class[]
   addressId   String
   address     Address             @relation(fields: [addressId], references: [id])
+  classrooms  Classroom[]
+  buildings   Building[]
 }
 
-model Address {
+model Building {
   id          String              @id @default(cuid())
-  street      String
-  city        String
-  zipCode     String
+  name        String
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   deleted     Boolean             @default(false)
-  students    Student[]
   classrooms  Classroom[]
-  professors  Professor[]
+  campusId    String
+  campus      Campus              @relation(fields: [campusId], references: [id])
+}
+
+model Classroom {
+  id          String              @id @default(cuid())
+  name        String
+  floor       Int
+  buildingId  String
+  building    Building            @relation(fields: [buildingId], references: [id])
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deleted     Boolean             @default(false)
+  classes     Class[]
+  campusId    String
+  campus      Campus              @relation(fields: [campusId], references: [id])
+}
+
+model Address {
+  id            String              @id @default(cuid())
+  street        String
+  city          String
+  zipCode       String
+  country       String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  deleted       Boolean             @default(false)
+  personalInfos PersonalInfo[]
+  campuses      Campus[]
 }

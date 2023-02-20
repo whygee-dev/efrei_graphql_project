@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudentInput, UpdateStudentInput } from './student.input';
-import { partialize } from 'src/common/utils';
+import { partialize } from '../common/utils';
 import { Prisma } from '@prisma/client';
 
 const INCLUDES: Prisma.StudentInclude = {
-  address: true,
+  personalInfo: {
+    include: {
+      address: true,
+    },
+  },
   curriculum: true,
+  group: true,
 };
 
 @Injectable()
@@ -14,16 +19,24 @@ export class StudentService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createStudent(data: CreateStudentInput) {
-    const { curriculumId, ...rest } = data;
+    const { curriculumId, groupId, ...rest } = data;
 
     return this.prisma.student.create({
       data: {
         ...rest,
         curriculum: { connect: { id: curriculumId } },
-        address: {
+        personalInfo: {
           create: {
-            ...data.address,
+            ...data.personalInfo,
+            address: {
+              create: {
+                ...data.personalInfo.address,
+              },
+            },
           },
+        },
+        group: {
+          connect: { id: groupId },
         },
       },
       include: INCLUDES,
@@ -39,17 +52,30 @@ export class StudentService {
   }
 
   async updateStudent(data: UpdateStudentInput) {
-    const { id, address, ...rest } = data;
+    const { id, personalInfo, curriculumId, groupId, ...rest } = data;
 
     return this.prisma.student.update({
       where: { id },
       data: {
         ...partialize(rest),
-        address: address
+        personalInfo: {
+          update: {
+            ...partialize(personalInfo),
+            address: personalInfo.address
+              ? {
+                  update: personalInfo.address,
+                }
+              : undefined,
+          },
+        },
+        curriculum: curriculumId
           ? {
-              update: {
-                ...address,
-              },
+              connect: { id: curriculumId },
+            }
+          : undefined,
+        group: groupId
+          ? {
+              connect: { id: groupId },
             }
           : undefined,
       },

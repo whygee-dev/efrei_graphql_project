@@ -1,38 +1,28 @@
+import { Field, InputType, OmitType, PartialType } from '@nestjs/graphql';
 import {
-  Field,
-  GraphQLISODateTime,
-  InputType,
-  OmitType,
-  PartialType,
-} from '@nestjs/graphql';
-import { Address } from 'src/common/graphql/Address.model';
+  PartialPersonalInfoInput,
+  PersonalInfo,
+} from 'src/common/graphql/PersonalInfo';
 
 @InputType()
 export class CreateStudentInput {
-  @Field()
-  firstName: string;
-
-  @Field()
-  lastName: string;
-
-  @Field()
-  email: string;
-
-  @Field(() => GraphQLISODateTime)
-  birthDate: Date;
-
-  @Field(() => Address)
-  address: Address;
+  @Field(() => PersonalInfo)
+  personalInfo: PersonalInfo;
 
   @Field()
   curriculumId: string;
+
+  @Field()
+  groupId: string;
 }
 
 @InputType()
-export class UpdateStudentInput extends OmitType(
-  PartialType(CreateStudentInput),
-  ['curriculumId'] as const,
+export class UpdateStudentInput extends PartialType(
+  OmitType(CreateStudentInput, ['personalInfo'] as const),
 ) {
   @Field()
   id: string;
+
+  @Field(() => PartialPersonalInfoInput, { nullable: true })
+  personalInfo?: PartialPersonalInfoInput;
 }

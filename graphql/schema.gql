@@ -2,24 +2,30 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Curriculum {
+  id: String!
+  name: String!
+}
+
+type Group {
+  id: String!
+  name: String!
+  curriculum: Curriculum!
+}
+
 type Address {
   street: String!
   city: String!
   zipCode: String!
+  country: String!
 }
 
-type Curriculum {
-  name: String!
-}
-
-type Student {
-  id: String!
-  name: String!
+type PersonalInfo {
+  firstName: String!
+  lastName: String!
+  birthDate: DateTime!
   email: String!
   address: Address!
-  curriculum: Curriculum!
-  createdAt: DateTime!
-  updatedAt: DateTime!
 }
 
 """
@@ -27,37 +33,299 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Student {
+  id: String!
+  personalInfo: PersonalInfo!
+  curriculum: Curriculum!
+  group: Group!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GenericCourse {
+  id: String!
+  name: String!
+}
+
+type Professor {
+  id: String!
+  personalInfo: PersonalInfo!
+  curriculum: Curriculum!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  hourlyWage: Float!
+}
+
+type Course {
+  id: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  professor: Professor!
+  genericCourse: GenericCourse!
+}
+
+type Exam {
+  id: String!
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  course: Course!
+}
+
+type Campus {
+  id: String!
+  name: String!
+  address: Address!
+  buildings: [Building!]!
+}
+
+type Building {
+  id: String!
+  name: String!
+  campus: Campus!
+}
+
+type Classroom {
+  id: String!
+  name: String!
+  campus: Campus!
+  building: Building!
+  floor: Int!
+}
+
+type Class {
+  id: ID!
+  startDate: DateTime!
+  endDate: DateTime!
+  course: Course!
+  professor: Professor!
+  classroom: Classroom!
+}
+
 input AddressInput {
   street: String!
   city: String!
   zipCode: String!
+  country: String!
+}
+
+input PersonalInfoInput {
+  firstName: String!
+  lastName: String!
+  birthDate: DateTime!
+  email: String!
+  address: AddressInput!
 }
 
 type Query {
   getStudent(id: String!): Student!
   getStudents: [Student!]!
+  getCourses: [Course!]!
+  getCourse(id: String!): Course!
+  getGenericCourses: [GenericCourse!]!
+  getGenericCourse(id: String!): GenericCourse!
+  getCurriculum(id: String!): Curriculum!
   getCurriculums: [Curriculum!]!
+  getExam(id: String!): Exam!
+  getExamsByCourse(courseId: String!): [Exam!]!
+  getProfessor(id: String!): Professor!
+  getProfessors: [Professor!]!
+  getGroup(id: String!): Group!
+  getGroups: [Group!]!
+  getClasses: [Class!]!
+  getClass(id: String!): Class!
+  getClassrooms: [Classroom!]!
+  getClassroom(id: String!): Classroom!
+  getBuildings: [Building!]!
+  getBuilding(id: String!): Building!
+  getCampuses: [Campus!]!
+  getCampus(id: String!): Campus!
 }
 
 type Mutation {
   createStudent(data: CreateStudentInput!): Student!
   updateStudent(data: UpdateStudentInput!): Student!
+  deleteStudent(id: String!): Student!
+  createCourse(data: CreateCourseInput!): Course!
+  updateCourse(data: UpdateCourseInput!): Course!
+  deleteCourse(id: String!): Course!
+  createGenericCourse(data: CreateGenericCourseInput!): GenericCourse!
+  updateGenericCourse(data: UpdateGenericCourseInput!): GenericCourse!
+  deleteGenericCourse(id: String!): GenericCourse!
+  createCurriculum(data: CreateCurriculumInput!): Curriculum!
+  updateCurriculum(data: UpdateCurriculumInput!): Curriculum!
+  deleteCurriculum(id: String!): Curriculum!
+  createExam(data: CreateExamInput!): Exam!
+  updateExam(data: UpdateExamInput!): Exam!
+  deleteExam(id: String!): Exam!
+  createProfessor(data: CreateProfessorInput!): Professor!
+  updateProfessor(data: UpdateProfessorInput!): Professor!
+  deleteProfessor(id: String!): Professor!
+  createGroup(data: CreateGroupInput!): Group!
+  updateGroup(data: UpdateGroupInput!): Group!
+  deleteGroup(id: String!): Group!
+  createClass(data: CreateClassInput!): Class!
+  updateClass(data: UpdateClassInput!): Class!
+  deleteClass(id: String!): Class!
+  createClassroom(data: CreateClassroomInput!): Classroom!
+  updateClassroom(data: UpdateClassroomInput!): Classroom!
+  deleteClassroom(id: String!): Classroom!
+  createBuilding(data: CreateBuildingInput!): Building!
+  updateBuilding(data: UpdateBuildingInput!): Building!
+  deleteBuilding(id: String!): Building!
+  createCampus(data: CreateCampusInput!): Campus!
+  updateCampus(data: UpdateCampusInput!): Campus!
+  deleteCampus(id: String!): Campus!
 }
 
 input CreateStudentInput {
-  firstName: String!
-  lastName: String!
-  email: String!
-  birthDate: DateTime!
-  address: AddressInput!
+  personalInfo: PersonalInfoInput!
   curriculumId: String!
+  groupId: String!
 }
 
 input UpdateStudentInput {
+  curriculumId: String
+  groupId: String
+  id: String!
+  personalInfo: PartialPersonalInfoInput
+}
+
+input PartialPersonalInfoInput {
   firstName: String
   lastName: String
-  email: String
   birthDate: DateTime
-  address: AddressInput
+  email: String
+  address: PartialAddressInput
+}
+
+input PartialAddressInput {
+  street: String
+  city: String
+  zipCode: String
+  country: String
+}
+
+input CreateCourseInput {
+  startDate: DateTime!
+  endDate: DateTime!
+  professorId: String!
+  genericCourseId: String!
+}
+
+input UpdateCourseInput {
+  startDate: DateTime
+  endDate: DateTime
+  professorId: String
+  genericCourseId: String
   id: String!
+}
+
+input CreateGenericCourseInput {
+  name: String!
+}
+
+input UpdateGenericCourseInput {
+  id: String!
+  name: String!
+}
+
+input CreateCurriculumInput {
+  name: String!
+}
+
+input UpdateCurriculumInput {
+  id: String!
+  name: String!
+}
+
+input CreateExamInput {
+  name: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  courseId: String!
+}
+
+input UpdateExamInput {
+  name: String
+  startDate: DateTime
+  endDate: DateTime
+  courseId: String
+  id: String!
+}
+
+input CreateProfessorInput {
+  personalInfo: PersonalInfoInput!
+  hourlyWage: Float!
+}
+
+input UpdateProfessorInput {
+  hourlyWage: Float
+  id: String!
+  personalInfo: PartialPersonalInfoInput
+}
+
+input CreateGroupInput {
+  name: String!
+  curriculumId: String!
+}
+
+input UpdateGroupInput {
+  name: String
+  curriculumId: String
+  id: String!
+}
+
+input CreateClassInput {
+  startDate: DateTime!
+  endDate: DateTime!
+  courseId: String!
+  professorId: String!
+  classroomId: String!
+}
+
+input UpdateClassInput {
+  startDate: DateTime
+  endDate: DateTime
+  courseId: String
+  professorId: String
+  classroomId: String
+  id: String!
+}
+
+input CreateClassroomInput {
+  name: String!
+  buildingId: String!
+  campusId: String!
+  floor: Int!
+}
+
+input UpdateClassroomInput {
+  name: String
+  buildingId: String
+  campusId: String
+  floor: Int
+  id: String!
+}
+
+input CreateBuildingInput {
+  name: String!
+  campusId: String!
+}
+
+input UpdateBuildingInput {
+  name: String
+  campusId: String
+  id: String!
+}
+
+input CreateCampusInput {
+  name: String!
+  address: AddressInput!
+}
+
+input UpdateCampusInput {
+  name: String
+  id: String!
+  address: PartialAddressInput
 }
